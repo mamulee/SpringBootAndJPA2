@@ -9,12 +9,44 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
 public class MemberApiController {
 
     private final MemberService memberService;
+
+    // Entity를 직접 노출 시 다양한 문제점이 생긴다. (필기 참고 "회원 수정 API - 조회 V1)
+    @GetMapping("/api/v1/members")
+    public List<Member> membersV1() {
+        return memberService.findMembers();
+    }
+
+    @GetMapping("/api/v2/members")
+    public Result memberV2() {
+        List<Member> findMembers = memberService.findMembers();
+        List<MemberDto> collect = findMembers.stream()
+                .map(m -> new MemberDto(m.getName()))
+                .collect(Collectors.toList());
+
+        return new Result(/*collect.size(),*/ collect);
+    }
+
+    // Json Array로 응답이 나간다면 유연성이 떨어지기 때문에 Result 객체로 한 번 감싸준다.
+    @Data
+    @AllArgsConstructor
+    static class Result<T> {
+        // private int count; 이런 것도 추가 가능
+        private T data;
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class MemberDto {
+        private String name;
+    }
 
     @PostMapping("/api/v1/members")
     public CreateMemberResponse saveMemberV1(@RequestBody @Valid Member member) {
