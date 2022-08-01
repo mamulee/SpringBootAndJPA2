@@ -25,6 +25,7 @@ public class Member {
 
     // @JsonIgnore // Member 조회 시 제외시키고 싶을 때, 하지만 Entity에 화면과 관련한 기능이 추가되어 버린다.
     // 양방향 의존관계가 걸리면서 API 수정 시 곤란해진다.
+    @JsonIgnore
     @OneToMany(mappedBy = "member")
     private List<Order> orders = new ArrayList<>();
 }
